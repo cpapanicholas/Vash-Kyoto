@@ -13,7 +13,7 @@ app.listen(PORT, () => {
 });
 
 // Define a route to get all notes
-app.get('/api/notes', (req, res) => {
+app.get('/api/notes.html', (req, res) => {
   try {
     // Read the notes from the db.json file
     const notes = JSON.parse(fs.readFileSync('db.json', 'utf8'));
@@ -25,7 +25,7 @@ app.get('/api/notes', (req, res) => {
 });
   
 // Define a route to save a new note
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes.html', (req, res) => {
   try {
     const newNote = req.body;
     // Read existing notes
@@ -44,7 +44,7 @@ app.post('/api/notes', (req, res) => {
 });
 
 // Define a route to delete a note
-app.delete('/api/notes/:id', (req, res) => {
+app.delete('/api/notes.html/:id', (req, res) => {
   try {
     const noteId = req.params.id;
     // Read existing notes
