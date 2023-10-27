@@ -1,4 +1,3 @@
-
 let noteForm;
 let noteTitle;
 let noteText;

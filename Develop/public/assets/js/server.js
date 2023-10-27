@@ -1,6 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+
+function generateUniqueId() {
+  return uuidv4();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,69 +17,95 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+app.get('/notes', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'notes.html'));
+});
+
+// Catch-all route that serves the index.html file for any other URL
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 function generateUniqueId() {
   // Generate a random number between 0 and 9999 (you can adjust the range as needed)
   const randomPart = Math.floor(Math.random() * 10000);
-  
+
   // Get the current timestamp in milliseconds
   const timestamp = new Date().getTime();
 
   // Combine the timestamp and random number to create a unique ID
   const uniqueId = `${timestamp}-${randomPart}`;
-  
+
   return uniqueId;
 }
 
 // Define a route to get all notes
 app.get('/api/notes', (req, res) => {
-  try {
-    // Read the notes from the db.json file
-    const notes = JSON.parse(fs.readFileSync('db.json', 'utf8'));
-    res.json(notes);
-  } catch (error) {
-    // Handle any errors, such as if the file doesn't exist
-    res.status(500).json({ error: 'Failed to retrieve notes' });
-  }
+  fs.readFile(path.join(__dirname, 'db.json'), (err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to read notes' });
+    } else {
+      const notes = JSON.parse(data);
+      res.json(notes);
+    }
+  });
 });
-  
+
 // Define a route to save a new note
 app.post('/api/notes', (req, res) => {
-  try {
-    const newNote = req.body;
-    // Read existing notes
-    const notes = JSON.parse(fs.readFileSync('db.json', 'utf8'));
-    // Assign a unique ID to the new note (you can use a library like uuid for this)
-    newNote.id = generateUniqueId(); // Implement generateUniqueId() as needed
-    // Add the new note to the list of notes
-    notes.push(newNote);
-    // Write the updated notes back to the db.json file
-    fs.writeFileSync('db.json', JSON.stringify(notes));
-    res.json(newNote);
-  } catch (error) {
-    // Handle any errors, such as file read/write errors
-    res.status(500).json({ error: 'Failed to save the note' });
-  }
+  fs.readFile(path.join(__dirname, 'db.json'), (err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to read notes' });
+    } else {
+      const notes = JSON.parse(data);
+      const newNote = req.body;
+
+      // Generate a unique ID for the new note
+      newNote.id = generateUniqueId(); // Implement the generateUniqueId function
+
+      // Add the new note to the array of notes
+      notes.push(newNote);
+
+      // Write the updated notes array back to db.json
+      fs.writeFile(path.join(__dirname, 'db.json'), JSON.stringify(notes), (err) => {
+        if (err) {
+          res.status(500).json({ error: 'Failed to save the note' });
+        } else {
+          res.json(newNote);
+        }
+      });
+    }
+  });
 });
 
 // Define a route to delete a note
 app.delete('/api/notes/:id', (req, res) => {
-  try {
-    const noteId = req.params.id;
-    // Read existing notes
-    const notes = JSON.parse(fs.readFileSync('db.json', 'utf8'));
-    // Find the index of the note with the given ID
-    const index = notes.findIndex((note) => note.id === noteId);
-    if (index !== -1) {
-      // Remove the note from the array
-      notes.splice(index, 1);
-      // Write the updated notes back to the db.json file
-      fs.writeFileSync('db.json', JSON.stringify(notes));
-      res.json({ message: 'Note deleted successfully' });
+  const noteId = req.params.id;
+
+  fs.readFile(path.join(__dirname, 'db.json'), (err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to read notes' });
     } else {
-      res.status(404).json({ error: 'Note not found' });
+      const notes = JSON.parse(data);
+
+      // Find the index of the note to delete
+      const index = notes.findIndex((note) => note.id === noteId);
+
+      if (index !== -1) {
+        // Remove the note with the given ID
+        notes.splice(index, 1);
+
+        // Write the updated notes array back to db.json
+        fs.writeFile(path.join(__dirname, 'db.json'), JSON.stringify(notes), (err) => {
+          if (err) {
+            res.status(500).json({ error: 'Failed to delete the note' });
+          } else {
+            res.json({ message: 'Note deleted successfully' });
+          }
+        });
+      } else {
+        res.status(404).json({ error: 'Note not found' });
+      }
     }
-  } catch (error) {
-    // Handle any errors, such as file read/write errors
-    res.status(500).json({ error: 'Failed to delete the note' });
-  }
+  });
 });
