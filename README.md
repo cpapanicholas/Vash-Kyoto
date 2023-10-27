@@ -31,13 +31,13 @@ THEN I am presented with empty fields to enter a new note title and the note’s
   - [Questions](#questions)
   
   ## Installation
-  To install this project download the code or copy it into your terminal.  
+  To install this project download the code or copy it into your terminal.  If you merely want to just use the applcation for its intended purpose just go to this link: https://cpapanicholas.github.io/Vash-Kyoto/ 
   
   ## Usage
   To use the project open it in a browser and click new note.  From there you can title it and add whatever you like.  You can then save it and access it later on and delete it if you'd like.
   
   ## Contributing
-  undefined
+  Email Me!
   
   ## Tests
   TEST
