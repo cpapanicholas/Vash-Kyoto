@@ -12,8 +12,21 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+function generateUniqueId() {
+  // Generate a random number between 0 and 9999 (you can adjust the range as needed)
+  const randomPart = Math.floor(Math.random() * 10000);
+  
+  // Get the current timestamp in milliseconds
+  const timestamp = new Date().getTime();
+
+  // Combine the timestamp and random number to create a unique ID
+  const uniqueId = `${timestamp}-${randomPart}`;
+  
+  return uniqueId;
+}
+
 // Define a route to get all notes
-app.get('/api/notes.html', (req, res) => {
+app.get('/api/notes', (req, res) => {
   try {
     // Read the notes from the db.json file
     const notes = JSON.parse(fs.readFileSync('db.json', 'utf8'));
@@ -25,7 +38,7 @@ app.get('/api/notes.html', (req, res) => {
 });
   
 // Define a route to save a new note
-app.post('/api/notes.html', (req, res) => {
+app.post('/api/notes', (req, res) => {
   try {
     const newNote = req.body;
     // Read existing notes
@@ -44,7 +57,7 @@ app.post('/api/notes.html', (req, res) => {
 });
 
 // Define a route to delete a note
-app.delete('/api/notes.html/:id', (req, res) => {
+app.delete('/api/notes/:id', (req, res) => {
   try {
     const noteId = req.params.id;
     // Read existing notes
